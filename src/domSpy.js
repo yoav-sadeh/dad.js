@@ -1,32 +1,28 @@
-
-class DOMSpy {
+class Crawler {
 
     constructor() {
-        window.events = [];
-        window.DOMSnapshot = {};
-        window.DOMChangedEvent = new Event('dom-changed');
-
-        window.getAllElements = this.getAllElements;
-        window.getAllPropertyNames = this.getAllPropertyNames;
-        window.toDict = this.serialize;
-        window.eventToDict = this.eventToDict;
-        window.takeDOMSnapshot = this.takeDOMSnapshot;
-        window.getNodeUniqueId = this.getNodeUniqueId;
-        window.getPathTo = this.getPathTo;
-        window.sessionStart = (new Date).getTime();
-        window.observer = new MutationObserver(mutations => {
+        this.events = [];
+        //this.recordEvent.bind(this);
+        this.DOMSnapshot = {};
+        this.DOMChangedEvent = new Event('dom-changed');
+        var head = document.getElementsByTagName('head')[0];
+        var jq = document.createElement('script');
+        jq.src = "https://code.jquery.com/jquery-3.3.1.min.js";
+        head.appendChild(jq);
+        this.sessionStart = (new Date).getTime();
+        this.observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 console.log(JSON.stringify(this.getAllPropertyNames(mutation)));
             })
         })
 
-
-        this.getAllElements().forEach(el => observer.observe(el, {
+        this.getAllElements().forEach(el => this.observer.observe(el, {
             childList: true,
             attributes: true
         }));
-        this.getAllElements().forEach(el => registerListener('click', el, recordEvent));
-        this.getAllElements().forEach(el => registerListener('change', el, recordEvent));
+        const vm = this;
+        this.getAllElements().forEach(el => this.registerListener('click', el, e => vm.recordEvent(e)));
+        this.getAllElements().forEach(el => this.registerListener('change', el, e => vm.recordEvent(e)));
 
     }
 
@@ -41,9 +37,8 @@ class DOMSpy {
     getAllPropertyNames(obj) {
         var props = Object.getOwnPropertyNames(obj);
         if (obj.__proto__ != null) {
-            return props.concat(getAllPropertyNames(obj.__proto__))
-        }
-        else {
+            return props.concat(this.getAllPropertyNames(obj.__proto__))
+        } else {
             return props;
         }
     }
@@ -57,15 +52,15 @@ class DOMSpy {
             return inclusions.length === 0 || inclusions.includes(n);
         }
 
-        dict = {}
-        getAllPropertyNames(obj).filter(included).filter(notExcluded).forEach(n => dict[n] = obj[n]);
+        const dict = {}
+        this.getAllPropertyNames(obj).filter(included).filter(notExcluded).forEach(n => dict[n] = obj[n]);
         return dict;
     }
 
     eventToDict(e) {
         var res = {};
-        res['nodeUID'] = getNodeUniqueId(e.node);
-        res['event'] = serialize(e.event, excluded = ['target']);
+        res['nodeUID'] = this.getNodeUniqueId(e.node);
+        res['event'] = this.serialize(e.event, ['target']);
         res['at'] = e.at;
         res['isActive'] = document.activeElement == e.node;
         return res;
@@ -88,24 +83,25 @@ class DOMSpy {
         }
     }
 
+
     getNodeUniqueId(node) {
         const keySeparator = "$$";
         const fieldSeparator = '|';
-        fields = [];
-        fields.push(node.id.length > 0 ? `id${keySeparator}${node.id}` : null); //TODO: Implement full recognition
-        fields.push(node.classList.length > 0 ? `id${keySeparator}${node.id}` : null);
-        return fields.filter(f => f !== null).join(fieldSeparator)
+        this.fields = [];
+        this.fields.push(node.id.length > 0 ? `id${keySeparator}${node.id}` : null); //TODO: Implement full recognition
+        this.fields.push(node.classList.length > 0 ? `id${keySeparator}${node.id}` : null);
+        return this.fields.filter(f => f !== null).join(fieldSeparator)
     }
 
     stampNode(node) {
-        let uid = getNodeUniqueId(node);
+        let uid = this.getNodeUniqueId(node);
         node.setAttribute('bfy-uid', uid);
-        let hirarchy = getPathTo(node);
+        let hirarchy = this.getPathTo(node);
         node.setAttribute('bfy-hirarchy', hirarchy);
     }
 
     takeDOMSnapshot() {
-        return getAllElements().map(serialize)
+        return this.getAllElements().map(serialize)
     }
 
     recordEvent(event) {
@@ -113,7 +109,7 @@ class DOMSpy {
 
         var isActive = document.activeElement === event.target;
 
-        events.push(eventToDict({
+        this.events.push(this.eventToDict({
             'at': new Date(),
             'node': event.target,
             'event': event,
@@ -123,4 +119,4 @@ class DOMSpy {
 
 }
 
-module.exports = DOMSpy
+const crawler = new Crawler()
