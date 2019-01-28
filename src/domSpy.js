@@ -5,10 +5,7 @@ class Crawler {
         //this.recordEvent.bind(this);
         this.DOMSnapshot = {};
         this.DOMChangedEvent = new Event('dom-changed');
-        var head = document.getElementsByTagName('head')[0];
-        var jq = document.createElement('script');
-        jq.src = "https://code.jquery.com/jquery-3.3.1.min.js";
-        head.appendChild(jq);
+
         this.sessionStart = (new Date).getTime();
         this.observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
