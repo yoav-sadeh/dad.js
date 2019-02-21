@@ -1,6 +1,7 @@
 class Crawler {
 
     constructor(mutationEventHandler) {
+        console.log(`got handler: ${mutationEventHandler}`)
         this.events = [];
         //this.recordEvent.bind(this);
         this.DOMSnapshot = {};
