@@ -1,6 +1,6 @@
 class Crawler {
 
-    constructor() {
+    constructor(mutationEventHandler) {
         this.events = [];
         //this.recordEvent.bind(this);
         this.DOMSnapshot = {};
@@ -9,8 +9,10 @@ class Crawler {
         this.sessionStart = (new Date).getTime();
         this.observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
-                console.log(JSON.stringify(this.getAllPropertyNames(mutation)));
+                // console.log(JSON.stringify(this.getAllPropertyNames(mutation)));
+                mutationEventHandler(mutation)
             })
+
         })
 
         this.getAllElements().forEach(el => this.observer.observe(el, {
