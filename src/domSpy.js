@@ -5,12 +5,13 @@ class Crawler {
         //this.recordEvent.bind(this);
         this.DOMSnapshot = {};
         this.DOMChangedEvent = new Event('dom-changed');
-
+        this.mutationEventHandler = mutationEventHandler;
+        const vm = this;
         this.sessionStart = (new Date).getTime();
         this.observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 // console.log(JSON.stringify(this.getAllPropertyNames(mutation)));
-                mutationEventHandler(mutation)
+                vm.mutationEventHandler(mutation)
             })
 
         })
@@ -19,7 +20,6 @@ class Crawler {
             childList: true,
             attributes: true
         }));
-        const vm = this;
         this.getAllElements().forEach(el => this.registerListener('click', el, e => vm.recordEvent(e)));
         this.getAllElements().forEach(el => this.registerListener('change', el, e => vm.recordEvent(e)));
 
