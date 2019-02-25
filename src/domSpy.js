@@ -1,4 +1,4 @@
-class Crawler {
+export class Crawler {
 
     constructor(mutationEventHandler) {
         console.log(`got handler: ${mutationEventHandler}`)
@@ -119,4 +119,3 @@ class Crawler {
 
 }
 
-const crawler = new Crawler()
