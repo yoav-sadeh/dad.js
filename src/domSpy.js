@@ -119,6 +119,8 @@ export class Crawler {
 
 }
 
-function createCrawler(handler){
+window.createCrawler = function createCrawler(handler){
     return new Crawler(handler);
-}
+};
+
+window.Crawler = Crawler;
