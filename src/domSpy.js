@@ -119,3 +119,6 @@ export class Crawler {
 
 }
 
+function createCrawler(handler){
+    return new Crawler(handler);
+}
